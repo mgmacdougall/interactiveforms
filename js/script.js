@@ -26,9 +26,9 @@ userTitleSelection.addEventListener('change', (e) => {
 
 tShirtDesignSelection.addEventListener('change', (e) => {
 	e.preventDefault();
-	reset(); // reset the values
-
-	const selections = [
+	reset(); // reset the values before starting
+	const tshirtData = [
+		{ selection: '', disabledcolors: [] },
 		{
 			selection: 'js puns',
 			disabledcolors: ['tomato', 'steelblue', 'dimgrey'],
@@ -38,35 +38,23 @@ tShirtDesignSelection.addEventListener('change', (e) => {
 			disabledcolors: ['cornflowerblue', 'darkslategrey', 'gold'],
 		},
 	];
-	let tShirtSelectionType = e.target.value;
-
-	if (tShirtSelectionType === 'js puns') {
-		for (let c in selections) {
-			if (selections[c].selection === 'js puns') {
-				for (let v in tShirtColorSelectionOptionsArray) {
-					console.log(tShirtColorSelectionOptionsArray[v].value);
-					if (selections[c].disabledcolors.includes(tShirtColorSelectionOptionsArray[v].value)) {
-						tShirtColorSelectionOptionsArray[v].disabled = true;
-					}
-				}
-			}
-		}
-	}
-
-	// If sthirt value is "Theme - I ♥ JS" then the color menu should only display "Tomato," "Steel Blue," and "Dim Grey."
-	else if (tShirtSelectionType === 'heart js') {
-		for (let c in selections) {
-			if (selections[c].selection === 'heart js') {
-				for (let v in tShirtColorSelectionOptionsArray) {
-					console.log(tShirtColorSelectionOptionsArray[v].value);
-					if (selections[c].disabledcolors.includes(tShirtColorSelectionOptionsArray[v].value)) {
-						tShirtColorSelectionOptionsArray[v].disabled = true;
-					}
-				}
-			}
-		}
-	}
+	let tShirtSelectionType = e.target.selectedIndex; // gets the selected index of the item selected
+	invokeSelection(tshirtData[tShirtSelectionType].selection, tshirtData); // passes data to the invoke Selection
 });
+
+// Selects the drop down item with the data provided
+function invokeSelection(option, data) {
+	for (let item in data) {
+		if (data[item].selection === option) {
+			for (let color in tShirtColorSelectionOptionsArray) {
+				console.log(tShirtColorSelectionOptionsArray[color].value);
+				if (data[item].disabledcolors.includes(tShirtColorSelectionOptionsArray[color].value)) {
+					tShirtColorSelectionOptionsArray[color].disabled = true;
+				}
+			}
+		}
+	}
+}
 
 // Reset function to reset all the values in the drop downs
 function reset() {
