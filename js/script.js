@@ -2,6 +2,10 @@ let nameField = document.querySelector('#name');
 let occupationContainer = document.querySelector('.occupation');
 let userTitleSelection = document.querySelector('#title');
 let tShirtDesignSelection = document.querySelector('#design');
+let tShirtColorSelect = document.querySelector('#color');
+let tShirtColorSelectionOptions = document.getElementById('color');
+
+let tShirtColorSelectionOptionsArray = Array.from(tShirtColorSelectionOptions.getElementsByTagName('option'));
 
 const selectionOther = 'other';
 
@@ -22,40 +26,57 @@ userTitleSelection.addEventListener('change', (e) => {
 
 tShirtDesignSelection.addEventListener('change', (e) => {
 	e.preventDefault();
+	reset(); // reset the values
 
-	// These are the tshirt selections.
 	const selections = [
 		{
 			selection: 'js puns',
-			colors: ['cornflowerblue', 'darkslategrey', 'darkslategrey'],
+			disabledcolors: ['tomato', 'steelblue', 'dimgrey'],
 		},
 		{
 			selection: 'heart js',
-			colors: ['tomato', 'steelblue', 'dimgrey'],
+			disabledcolors: ['cornflowerblue', 'darkslategrey', 'gold'],
 		},
 	];
 	let tShirtSelectionType = e.target.value;
 
-	// If tshirt value is Theme - JS Puns -> display Cornflower Blue," "Dark Slate Grey," and "Gold."
 	if (tShirtSelectionType === 'js puns') {
 		for (let c in selections) {
 			if (selections[c].selection === 'js puns') {
-				console.log(selections[c].colors);
+				for (let v in tShirtColorSelectionOptionsArray) {
+					console.log(tShirtColorSelectionOptionsArray[v].value);
+					if (selections[c].disabledcolors.includes(tShirtColorSelectionOptionsArray[v].value)) {
+						tShirtColorSelectionOptionsArray[v].disabled = true;
+					}
+				}
 			}
 		}
 	}
 
 	// If sthirt value is "Theme - I ♥ JS" then the color menu should only display "Tomato," "Steel Blue," and "Dim Grey."
-	if (tShirtSelectionType === 'heart js') {
+	else if (tShirtSelectionType === 'heart js') {
 		for (let c in selections) {
 			if (selections[c].selection === 'heart js') {
-				console.log(selections[c].colors);
+				for (let v in tShirtColorSelectionOptionsArray) {
+					console.log(tShirtColorSelectionOptionsArray[v].value);
+					if (selections[c].disabledcolors.includes(tShirtColorSelectionOptionsArray[v].value)) {
+						tShirtColorSelectionOptionsArray[v].disabled = true;
+					}
+				}
 			}
 		}
 	}
-
-	// When a new Selection is made in the Design menu - then Both the color and and drop down menu is change
 });
+
+// Reset function to reset all the values in the drop downs
+function reset() {
+	tShirtColorSelectionOptionsArray.forEach((v) => {
+		console.log(v.disabled);
+		if (v.value) {
+			v.disabled = false;
+		}
+	});
+}
 
 function displayOtherInput() {
 	occupationContainer.style.display = 'block';
