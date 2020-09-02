@@ -5,10 +5,13 @@ let tShirtDesignSelection = document.getElementById('design');
 let tShirtColorSelect = document.querySelector('#color');
 let tShirtColorSelectionOptions = document.getElementById('color');
 
+let registerForActivitiesContainer = document.querySelector('.activities');
+
 let tShirtColorSelectionOptionsArray = Array.from(tShirtColorSelectionOptions.getElementsByTagName('option'));
 
 const selectionOther = 'other';
 
+const activities = [];
 // to reset page on load
 window.addEventListener('load', (e) => {
 	nameField.focus();
@@ -48,6 +51,46 @@ tShirtDesignSelection.addEventListener('change', (e) => {
 	let defaultSelection = tshirtData[tShirtSelectionType].defaultColor;
 	setDefaultTshirtColorOption(defaultSelection);
 	updateDesignDropDown();
+});
+
+registerForActivitiesContainer.addEventListener('click', (e) => {
+	let checkBox = e.target;
+	let name = checkBox.name;
+	let data = checkBox.dataset;
+	let date = formatSelection(data.dayAndTime);
+	let cost = data.cost;
+
+	// creates the current selection
+	let selectInfo = {
+		name,
+		date,
+		cost,
+	};
+	activities.push(selectInfo); // adds selection to the persistence array
+
+	// Disables the selections that conflict
+	if (selectInfo.name === 'js-frameworks') {
+		let expressCheckBox = registerForActivitiesContainer.querySelector('[name="express"]');
+		expressCheckBox.parentNode.style.color = 'gray';
+		expressCheckBox.disabled = true;
+	}
+
+	if (selectInfo.name === 'express') {
+		let expressCheckBox = registerForActivitiesContainer.querySelector('[name="js-frameworks"]');
+		expressCheckBox.parentNode.style.color = 'gray';
+		expressCheckBox.disabled = true;
+	}
+
+	if (selectInfo.name === 'js-libs') {
+		let expressCheckBox = registerForActivitiesContainer.querySelector('[name="node"]');
+		expressCheckBox.parentNode.style.color = 'gray';
+		expressCheckBox.disabled = true;
+	}
+	if (selectInfo.name === 'node') {
+		let expressCheckBox = registerForActivitiesContainer.querySelector('[name="js-libs"]');
+		expressCheckBox.parentNode.style.color = 'gray';
+		expressCheckBox.disabled = true;
+	}
 });
 
 // Selects the drop down item with the data provided
@@ -91,4 +134,10 @@ function displayOtherInput() {
 
 function hideOtherInput() {
 	occupationContainer.style.display = 'none';
+}
+
+// Helper to make comparisons easier for date
+function formatSelection(dateValue) {
+	// const date = 'Tuesday 9am-12pm';
+	return dateValue.toLowerCase().replace(/[\s+,\-]/, '');
 }
