@@ -11,13 +11,13 @@ let tShirtColorSelectionOptionsArray = Array.from(tShirtColorSelectionOptions.ge
 
 const selectionOther = 'other';
 
-const activities = [];
-// to reset page on load
+//============== Window Event listener to set focus to Name field ==============//
 window.addEventListener('load', (e) => {
 	nameField.focus();
 	hideOtherInput();
 });
 
+//============== Script Section: Job Role Selection ==============//
 userTitleSelection.addEventListener('change', (e) => {
 	e.preventDefault();
 	let selection = e.target.value;
@@ -28,6 +28,14 @@ userTitleSelection.addEventListener('change', (e) => {
 	}
 });
 
+function displayOtherInput() {
+	occupationContainer.style.display = 'block';
+}
+
+function hideOtherInput() {
+	occupationContainer.style.display = 'none';
+}
+//============== Script Section: T-Shirt Design control section ==============//
 tShirtDesignSelection.addEventListener('change', (e) => {
 	e.preventDefault();
 	reset(); // reset the values before starting
@@ -53,14 +61,19 @@ tShirtDesignSelection.addEventListener('change', (e) => {
 	updateDesignDropDown();
 });
 
+// sets the default value displaying in the drop down selection
+function setDefaultTshirtColorOption(color) {
+	document.querySelector(`[value='${color}']`).selected = 'true'; // sets the default value
+}
+
+//============== Script Section: Activity registration  ==============//
 registerForActivitiesContainer.addEventListener('click', (e) => {
 	let checkBox = e.target;
 	let name = checkBox.name;
 	let data = checkBox.dataset;
 	let date = data.dayAndTime;
 
-	// Search through the dom and look for a matchin date time (use the formatter)
-	let allNodes = Array.from(document.querySelectorAll(`[data-day-and-time='${date}']`)); // get the current selection date time
+	let allNodes = Array.from(document.querySelectorAll(`[data-day-and-time='${date}']`));
 	for (let item in allNodes) {
 		let checkboxName = allNodes[item].name;
 		if (checkboxName !== name) {
@@ -101,7 +114,34 @@ function invokeSelection(option, data) {
 	}
 }
 
-// Reset function to reset all the values in the drop downs
+//============== Payment information:   ==============//
+
+let paymentDropDown = document.getElementById('payment');
+
+paymentDropDown.addEventListener('change', (e) => {
+	e.preventDefault();
+	let selected = e.target.value;
+
+	// This is needed to replace the - in the in the event that the selection is missing a'-'
+	let selectionItem = selected.replace(/\W+/, '-');
+
+	let selectElements = {
+		paypal: 'paypal',
+		'credit-card': 'credit-card',
+		bitcoin: 'bitcoin',
+	};
+
+	for (let item in selectElements) {
+		if (selectElements[item] !== selectionItem) {
+			document.getElementById(selectElements[item]).hidden = true;
+		} else {
+			document.getElementById(selectElements[item]).hidden = false;
+		}
+	}
+});
+
+//============== General Functions Section: Supporting functions  ==============//
+// Resets the Page to default view
 function reset() {
 	tShirtColorSelectionOptionsArray.forEach((v) => {
 		if (v.value) {
@@ -111,22 +151,9 @@ function reset() {
 	});
 }
 
-// sets the default value displaying in the drop down selection
-function setDefaultTshirtColorOption(color) {
-	document.querySelector(`[value='${color}']`).selected = 'true'; // sets the default value
-}
-
 // Resets the TShirt design drop down
 function updateDesignDropDown() {
 	let designThemeDefault = document.querySelector('#design').firstElementChild;
 	let isHidden = designThemeDefault.hidden;
 	isHidden ? (designThemeDefault.hidden = 'false') : (designThemeDefault.hidden = 'true');
-}
-
-function displayOtherInput() {
-	occupationContainer.style.display = 'block';
-}
-
-function hideOtherInput() {
-	occupationContainer.style.display = 'none';
 }
