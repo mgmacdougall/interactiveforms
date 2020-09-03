@@ -121,6 +121,7 @@ let paymentDropDown = document.getElementById('payment');
 paymentDropDown.addEventListener('change', (e) => {
 	e.preventDefault();
 	let selected = e.target.value;
+	updatePaymentDropDown();
 
 	// This is needed to replace the - in the in the event that the selection is missing a'-'
 	let selectionItem = selected.replace(/\W+/, '-');
@@ -151,9 +152,17 @@ function reset() {
 	});
 }
 
+// ========= Form Validation section ========
+
 // Resets the TShirt design drop down
 function updateDesignDropDown() {
 	let designThemeDefault = document.querySelector('#design').firstElementChild;
 	let isHidden = designThemeDefault.hidden;
 	isHidden ? (designThemeDefault.hidden = 'false') : (designThemeDefault.hidden = 'true');
+}
+
+function updatePaymentDropDown() {
+	let defaultPayment = document.querySelector('#payment').firstElementChild;
+	let isHidden = defaultPayment.hidden;
+	isHidden ? (defaultPayment.hidden = 'false') : (defaultPayment.hidden = 'true');
 }
