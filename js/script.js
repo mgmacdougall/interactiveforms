@@ -58,32 +58,15 @@ registerForActivitiesContainer.addEventListener('click', (e) => {
 	let name = checkBox.name;
 	let data = checkBox.dataset;
 	let date = data.dayAndTime;
-	let cost = data.cost;
 
-	// creates the current selection
-	let selectInfo = {
-		name,
-		date,
-		cost,
-	};
-	activities.push(selectInfo); // adds selection to the persistence array
-
-	// Disables the selections that conflict
-	if (selectInfo.name === 'js-frameworks') {
-		let jsFrameWorksCheckbox = getCheckBox('express');
-		toggleActivitiesCheckbox(jsFrameWorksCheckbox);
-	}
-	if (selectInfo.name === 'express') {
-		let expressCheckBox = getCheckBox('js-frameworks');
-		toggleActivitiesCheckbox(expressCheckBox);
-	}
-	if (selectInfo.name === 'js-libs') {
-		let jsLibsCheckbox = getCheckBox('node');
-		toggleActivitiesCheckbox(jsLibsCheckbox);
-	}
-	if (selectInfo.name === 'node') {
-		let nodeCheckBox = getCheckBox('js-libs');
-		toggleActivitiesCheckbox(nodeCheckBox);
+	// Search through the dom and look for a matchin date time (use the formatter)
+	let allNodes = Array.from(document.querySelectorAll(`[data-day-and-time='${date}']`)); // get the current selection date time
+	for (let item in allNodes) {
+		let checkboxName = allNodes[item].name;
+		if (checkboxName !== name) {
+			let checkboxToDisable = getCheckBox(checkboxName);
+			toggleActivitiesCheckbox(checkboxToDisable);
+		}
 	}
 });
 
@@ -104,6 +87,7 @@ function enableCheckBox(item) {
 function getCheckBox(selector) {
 	return registerForActivitiesContainer.querySelector(`[name="${selector}"]`);
 }
+
 // Selects the drop down item with the data provided
 function invokeSelection(option, data) {
 	for (let item in data) {
@@ -145,10 +129,4 @@ function displayOtherInput() {
 
 function hideOtherInput() {
 	occupationContainer.style.display = 'none';
-}
-
-// Helper to make comparisons easier for date
-function formatSelection(dateValue) {
-	let date = dateValue.toLowerCase();
-	return date.replace(/[\s+,\-]/, '');
 }
