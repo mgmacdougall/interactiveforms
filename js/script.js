@@ -4,12 +4,13 @@ let userTitleSelection = document.querySelector('#title');
 let tShirtDesignSelection = document.getElementById('design');
 let tShirtColorSelect = document.querySelector('#color');
 let tShirtColorSelectionOptions = document.getElementById('color');
-
 let registerForActivitiesContainer = document.querySelector('.activities');
+let activitiesCostCheckboxes = document.querySelectorAll('.activities input');
 
 let tShirtColorSelectionOptionsArray = Array.from(tShirtColorSelectionOptions.getElementsByTagName('option'));
 
 const selectionOther = 'other';
+let activitiesCost = []; // array to hold selected activites
 
 //============== Window Event listener to set focus to Name field ==============//
 window.addEventListener('load', (e) => {
@@ -81,6 +82,9 @@ registerForActivitiesContainer.addEventListener('click', (e) => {
 			toggleActivitiesCheckbox(checkboxToDisable);
 		}
 	}
+
+	// update cost
+	updateActivitiesCost();
 });
 
 function toggleActivitiesCheckbox(item) {
@@ -114,8 +118,53 @@ function invokeSelection(option, data) {
 	}
 }
 
-//============== Payment information:   ==============//
+// add the updateCost function to create a div in && span at the bottom of the
+// field set of with the .activities class - put this call in the check selection
+// using the get data-cost value - reference is the object selected or unselected
 
+function updateActivitiesCost() {
+	//activitiesCost - this starts at 0
+	// Inner function to deal with creating/updating activites costs - creates the cost if doesn't exist. Else update
+	createCostContainer();
+	let total = calculateActivitesCost();
+	updateTotalCosts(total);
+}
+
+function createCostContainer() {
+	let activitiesFieldSet = document.querySelector('.activities'); // get the activites
+	let container = document.createElement('div');
+	container.id = 'currentCost';
+	let costSpan = document.createElement('span');
+	container.appendChild(costSpan);
+	container.value = 'hidden';
+	activitiesFieldSet.appendChild(container);
+}
+
+function updateTotalCosts(cost) {
+	let currentActivitiesCost = document.getElementById('currentCost');
+	let textField = currentActivitiesCost.firstElementChild;
+	if (cost > 0) {
+		textField.innerText = '$' + cost;
+		currentActivitiesCost.hidden = false;
+	} else {
+		// textField.innerText = null;
+		currentActivitiesCost.hidden = true;
+	}
+}
+
+function calculateActivitesCost() {
+	let totalCost = [...activitiesCostCheckboxes].reduce((_, activitiesItems) => {
+		if (activitiesItems.checked) {
+			let cost = parseInt(activitiesItems.dataset.cost);
+			return (_ += cost);
+		}
+		return _;
+	}, 0);
+
+	return totalCost; // parsing to remove the leading 0 from string
+}
+
+//============== Payment information:   ==============//
 let paymentDropDown = document.getElementById('payment');
 
 paymentDropDown.addEventListener('change', (e) => {
@@ -141,6 +190,13 @@ paymentDropDown.addEventListener('change', (e) => {
 	}
 });
 
+// Updates the Payment Drop down 'Select Payment Method'
+function updatePaymentDropDown() {
+	let defaultPayment = document.querySelector('#payment').firstElementChild;
+	let isHidden = defaultPayment.hidden;
+	isHidden ? (defaultPayment.hidden = 'false') : (defaultPayment.hidden = 'true');
+}
+
 //============== General Functions Section: Supporting functions  ==============//
 // Resets the Page to default view
 function reset() {
@@ -159,10 +215,4 @@ function updateDesignDropDown() {
 	let designThemeDefault = document.querySelector('#design').firstElementChild;
 	let isHidden = designThemeDefault.hidden;
 	isHidden ? (designThemeDefault.hidden = 'false') : (designThemeDefault.hidden = 'true');
-}
-
-function updatePaymentDropDown() {
-	let defaultPayment = document.querySelector('#payment').firstElementChild;
-	let isHidden = defaultPayment.hidden;
-	isHidden ? (defaultPayment.hidden = 'false') : (defaultPayment.hidden = 'true');
 }
