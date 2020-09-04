@@ -7,6 +7,14 @@ let tShirtColorSelectionOptions = document.getElementById('color');
 let registerForActivitiesContainer = document.querySelector('.activities');
 let activitiesCostCheckboxes = document.querySelectorAll('.activities input');
 
+// Fields input
+let userField = document.getElementById('name');
+let emailField = document.getElementById('mail');
+let ccNum = document.getElementById('cc-num');
+let zipCode = document.getElementById('zip');
+let ccv = document.getElementById('cvv');
+
+let submitButton = document.querySelector("[type='submit']");
 let tShirtColorSelectionOptionsArray = Array.from(tShirtColorSelectionOptions.getElementsByTagName('option'));
 
 const selectionOther = 'other';
@@ -83,8 +91,7 @@ registerForActivitiesContainer.addEventListener('click', (e) => {
 		}
 	}
 
-	// update cost
-	updateActivitiesCost();
+	updateActivitiesCost(); // update cost
 });
 
 function toggleActivitiesCheckbox(item) {
@@ -203,8 +210,44 @@ function reset() {
 	});
 }
 
-// ========= Form Validation section ========
+// ========= Form Validation section ========//
+submitButton.addEventListener('click', (e) => {
+	e.preventDefault();
+	console.log('here');
+	let userValid = validate(userField.innerText, /w+/gi);
+	let emailValid = validate(emailField.innerText, /w+/gi);
+	let activitiesValid = validateActivities();
+	let validCreditCard = validateCreditCard();
+});
 
+// validate the name field
+function validate(field, validationCriteria) {
+	let result = validationCriteria.test(field);
+	return result;
+}
+
+function validateActivities() {
+	let selections = [...activitiesCostCheckboxes].filter((item) => item.checked === true);
+	[...activitiesCostCheckboxes].forEach((item) => console.log(item.checked === true));
+	return selections.length > 0;
+}
+
+function validateCreditCard() {
+	let creditCardContainer = document.getElementById('credit-card');
+	if (creditCardContainer.hidden === false) {
+		// run the validations
+		let ccNum = document.getElementById('cc-num');
+		let number = ccNum.value;
+		let zipCode = document.getElementById('zip');
+		let zcode = zipCode.value;
+		let cvv = document.getElementById('cvv');
+		let cvvCode = cvv.value;
+		let isCCValid = validate(number, /^(?:4[0-9]{12}(?:[0-9]{3})?)$/);
+		let isZipValid = validate(zcode, /(^\d{5}$)|(^\d{5}-\d{4}$)/);
+		let isCVVValid = validate(cvvCode, /^[0-9]{3}/);
+		return isCCValid && isZipValid && isCVVValid;
+	}
+}
 // Resets the TShirt design drop down
 function updateDesignDropDown() {
 	let designThemeDefault = document.querySelector('#design').firstElementChild;
