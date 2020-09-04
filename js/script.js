@@ -118,13 +118,8 @@ function invokeSelection(option, data) {
 	}
 }
 
-// add the updateCost function to create a div in && span at the bottom of the
-// field set of with the .activities class - put this call in the check selection
-// using the get data-cost value - reference is the object selected or unselected
-
+//============== Script Section: Update Activities costs ==============//
 function updateActivitiesCost() {
-	//activitiesCost - this starts at 0
-	// Inner function to deal with creating/updating activites costs - creates the cost if doesn't exist. Else update
 	createCostContainer();
 	let total = calculateActivitesCost();
 	updateTotalCosts(total);
