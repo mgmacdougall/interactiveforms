@@ -6,13 +6,15 @@ let tShirtColorSelect = document.querySelector('#color');
 let tShirtColorSelectionOptions = document.getElementById('color');
 let registerForActivitiesContainer = document.querySelector('.activities');
 let activitiesCostCheckboxes = document.querySelectorAll('.activities input');
+let activitiesTitle = document.querySelector('.activities>legend');
+let creditCardContainer = document.getElementById('credit-card');
 
 // Fields input
 let userField = document.getElementById('name');
 let emailField = document.getElementById('mail');
 let ccNum = document.getElementById('cc-num');
 let zipCode = document.getElementById('zip');
-let ccv = document.getElementById('cvv');
+let cvvContainer = document.getElementById('cvv');
 
 let submitButton = document.querySelector("[type='submit']");
 let tShirtColorSelectionOptionsArray = Array.from(tShirtColorSelectionOptions.getElementsByTagName('option'));
@@ -149,7 +151,6 @@ function updateTotalCosts(cost) {
 		textField.innerText = '$' + cost;
 		currentActivitiesCost.hidden = false;
 	} else {
-		// textField.innerText = null;
 		currentActivitiesCost.hidden = true;
 	}
 }
@@ -212,12 +213,43 @@ function reset() {
 
 // ========= Form Validation section ========//
 submitButton.addEventListener('click', (e) => {
-	e.preventDefault();
-	console.log('here');
-	let userValid = validate(userField.innerText, /w+/gi);
-	let emailValid = validate(emailField.innerText, /w+/gi);
-	let activitiesValid = validateActivities();
-	let validCreditCard = validateCreditCard();
+	let invalidSelections = {};
+	let isUserValid = validate(userField.value, /w{1,}/gi);
+	if (!isUserValid) {
+		e.preventDefault();
+		invalidSelections['name'] = userField;
+	}
+
+	let isEmailValid = validate(emailField.value, /^\w{1,}\@\w{1,}\.\w{2,}/gi);
+	if (!isEmailValid) {
+		e.preventDefault();
+		invalidSelections['email'] = emailField;
+	}
+
+	let isActivitiesValid = validateActivities();
+	if (!isActivitiesValid) {
+		e.preventDefault();
+		invalidSelections['activities'] = activitiesTitle;
+	}
+
+	let isValidCreditCard = validCreditCardNumber();
+	if (!isValidCreditCard) {
+		e.preventDefault();
+		invalidSelections['creditcardnum'] = ccNum;
+	}
+
+	let isZipValid = validZipCode();
+	if (!isZipValid) {
+		e.preventDefault();
+		invalidSelections['zipcode'] = zipCode;
+	}
+
+	let isCVVValid = validCVV();
+	if (!isCVVValid) {
+		e.preventDefault();
+		invalidSelections['cvv'] = cvvContainer;
+	}
+	fieldValidationFormatter(invalidSelections);
 });
 
 // validate the name field
@@ -232,22 +264,33 @@ function validateActivities() {
 	return selections.length > 0;
 }
 
-function validateCreditCard() {
-	let creditCardContainer = document.getElementById('credit-card');
+function validCreditCardNumber() {
 	if (creditCardContainer.hidden === false) {
-		// run the validations
-		let ccNum = document.getElementById('cc-num');
 		let number = ccNum.value;
-		let zipCode = document.getElementById('zip');
-		let zcode = zipCode.value;
-		let cvv = document.getElementById('cvv');
-		let cvvCode = cvv.value;
-		let isCCValid = validate(number, /^(?:4[0-9]{12}(?:[0-9]{3})?)$/);
-		let isZipValid = validate(zcode, /(^\d{5}$)|(^\d{5}-\d{4}$)/);
-		let isCVVValid = validate(cvvCode, /^[0-9]{3}/);
-		return isCCValid && isZipValid && isCVVValid;
+		return (isCCValid = validate(number, /\d{13,16}/));
 	}
 }
+
+function validZipCode() {
+	if (creditCardContainer.hidden === false) {
+		let zcode = zipCode.value;
+		return (isZipValid = validate(zcode, /\d{5}/));
+	}
+}
+
+function validCVV() {
+	if (creditCardContainer.hidden === false) {
+		let cvvCode = cvv.value;
+		return validate(cvvCode, /[0-9]{3}/);
+	}
+}
+
+function fieldValidationFormatter(fields) {
+	for (let item in fields) {
+		fields[item].style.border = '5px solid red';
+	}
+}
+
 // Resets the TShirt design drop down
 function updateDesignDropDown() {
 	let designThemeDefault = document.querySelector('#design').firstElementChild;
