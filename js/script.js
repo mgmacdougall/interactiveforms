@@ -20,7 +20,6 @@ let submitButton = document.querySelector("[type='submit']");
 let tShirtColorSelectionOptionsArray = Array.from(tShirtColorSelectionOptions.getElementsByTagName('option'));
 
 const selectionOther = 'other';
-let activitiesCost = []; // array to hold selected activites
 
 //============== Window Event listener to set focus to Name field ==============//
 window.addEventListener('load', (e) => {
@@ -213,43 +212,76 @@ function reset() {
 
 // ========= Form Validation section ========//
 submitButton.addEventListener('click', (e) => {
-	let invalidSelections = {};
-	let isUserValid = validate(userField.value, /w{1,}/gi);
+	let isFormValid = true;
+
+	let isUserValid = validate(userField.value, /\w{1,}/gi);
 	if (!isUserValid) {
-		e.preventDefault();
-		invalidSelections['name'] = userField;
+		invalidFieldValidationLabelFormatter(userField);
+		invalidFieldValidationFormatter(userField);
+		isFormValid = false;
+	} else {
+		validFieldLabelFormatter(userField);
+		validFieldFormatter(userField);
 	}
 
 	let isEmailValid = validate(emailField.value, /^\w{1,}\@\w{1,}\.\w{2,}/gi);
 	if (!isEmailValid) {
-		e.preventDefault();
-		invalidSelections['email'] = emailField;
+		invalidFieldValidationLabelFormatter(emailField);
+		invalidFieldValidationFormatter(emailField);
+		isFormValid = false;
+	} else {
+		validFieldLabelFormatter(emailField);
+		validFieldFormatter(emailField);
 	}
 
 	let isActivitiesValid = validateActivities();
 	if (!isActivitiesValid) {
-		e.preventDefault();
-		invalidSelections['activities'] = activitiesTitle;
+		activitiesTitle.style.fontWeight = 'bold';
+		activitiesTitle.style.color = 'red';
+		invalidFieldValidationFormatter(activitiesTitle);
+		isFormValid = false;
+	} else {
+		activitiesTitle.style.fontWeight = null;
+		activitiesTitle.style.color = null;
+		validFieldFormatter(activitiesTitle);
 	}
 
 	let isValidCreditCard = validCreditCardNumber();
 	if (!isValidCreditCard) {
-		e.preventDefault();
-		invalidSelections['creditcardnum'] = ccNum;
+		invalidFieldValidationLabelFormatter(ccNum);
+		invalidFieldValidationFormatter(ccNum);
+		isFormValid = false;
+	} else {
+		validFieldLabelFormatter(ccNum);
+		validFieldFormatter(ccNum);
 	}
 
 	let isZipValid = validZipCode();
 	if (!isZipValid) {
-		e.preventDefault();
-		invalidSelections['zipcode'] = zipCode;
+		invalidFieldValidationLabelFormatter(zipCode);
+		invalidFieldValidationFormatter(zipCode);
+		isFormValid = false;
+	} else {
+		validFieldLabelFormatter(zipCode);
+		validFieldFormatter(zipCode);
 	}
 
 	let isCVVValid = validCVV();
 	if (!isCVVValid) {
-		e.preventDefault();
-		invalidSelections['cvv'] = cvvContainer;
+		invalidFieldValidationLabelFormatter(cvvContainer);
+		invalidFieldValidationFormatter(cvvContainer);
+		isFormValid = false;
+	} else {
+		validFieldLabelFormatter(cvvContainer);
+		validFieldFormatter(cvvContainer);
 	}
-	fieldValidationFormatter(invalidSelections);
+
+	if (isFormValid === false) {
+		e.preventDefault();
+	} else {
+		e.preventDefault();
+		console.log('Normally a post would happen here but swallowing for now');
+	}
 });
 
 // validate the name field
@@ -265,7 +297,7 @@ function validateActivities() {
 }
 
 function validCreditCardNumber() {
-	if (creditCardContainer.hidden === false) {
+	if (creditCardContainer.hidden === false && paymentDropDown.value === 'credit card') {
 		let number = ccNum.value;
 		return (isCCValid = validate(number, /\d{13,16}/));
 	}
@@ -285,9 +317,27 @@ function validCVV() {
 	}
 }
 
-function fieldValidationFormatter(fields) {
-	for (let item in fields) {
-		fields[item].style.border = '5px solid red';
+function invalidFieldValidationFormatter(field) {
+	field.style.border = '5px solid red';
+}
+
+function invalidFieldValidationLabelFormatter(field) {
+	let label = field.previousElementSibling;
+	label.style.color = 'red';
+	label.style.fontWeight = 'bold';
+}
+
+function validFieldFormatter(field) {
+	if (field.style.border !== null) {
+		field.style.border = null;
+	}
+}
+
+function validFieldLabelFormatter(field) {
+	let label = field.previousElementSibling;
+	if (label.style.fontWeight !== null) {
+		label.style.fontWeight = null;
+		label.style.color = null;
 	}
 }
 
