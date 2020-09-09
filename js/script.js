@@ -46,6 +46,7 @@ function displayOtherInput() {
 function hideOtherInput() {
 	occupationContainer.style.display = 'none';
 }
+
 //============== Script Section: T-Shirt Design control section ==============//
 tShirtDesignSelection.addEventListener('change', (e) => {
 	e.preventDefault();
@@ -66,8 +67,7 @@ tShirtDesignSelection.addEventListener('change', (e) => {
 	let tShirtSelectionType = e.target.selectedIndex; // gets the selected index of the item selected
 	invokeSelection(tshirtData[tShirtSelectionType].selection, tshirtData); // passes data to the invoke Selection
 
-	// default selection:
-	let defaultSelection = tshirtData[tShirtSelectionType].defaultColor;
+	let defaultSelection = tshirtData[tShirtSelectionType].defaultColor; // default selection
 	setDefaultTshirtColorOption(defaultSelection);
 	updateDesignDropDown();
 });
@@ -75,6 +75,13 @@ tShirtDesignSelection.addEventListener('change', (e) => {
 // sets the default value displaying in the drop down selection
 function setDefaultTshirtColorOption(color) {
 	document.querySelector(`[value='${color}']`).selected = 'true'; // sets the default value
+}
+
+// Resets the TShirt design drop down
+function updateDesignDropDown() {
+	let designThemeDefault = document.querySelector('#design').firstElementChild;
+	let isHidden = designThemeDefault.hidden;
+	isHidden ? (designThemeDefault.hidden = 'false') : (designThemeDefault.hidden = 'true');
 }
 
 //============== Script Section: Activity registration  ==============//
@@ -168,26 +175,22 @@ function calculateActivitesCost() {
 }
 
 //============== Payment information:   ==============//
-
 paymentDropDown.addEventListener('change', (e) => {
 	e.preventDefault();
 	let selected = e.target.value;
 	updatePaymentDropDown();
 
-	// This is needed to replace the - in the in the event that the selection is missing a'-'
-	let selectionItem = selected.replace(/\W+/, '-');
-
 	let selectElements = {
 		paypal: 'paypal',
-		'credit-card': 'credit-card',
+		'credit card': 'credit-card',
 		bitcoin: 'bitcoin',
 	};
 
 	for (let item in selectElements) {
-		if (selectElements[item] !== selectionItem) {
-			document.getElementById(selectElements[item]).hidden = true;
-		} else {
+		if (item === selected) {
 			document.getElementById(selectElements[item]).hidden = false;
+		} else {
+			document.getElementById(selectElements[item]).hidden = true;
 		}
 	}
 });
@@ -245,12 +248,12 @@ submitButton.addEventListener('click', (e) => {
 		validFieldFormatter(activitiesTitle);
 	}
 
-	// If bitcoin or paypal reset the dropdown validation
-	if (validatePayPalPaymentSelection() || validateBitcoinPaymentSelection()) {
+	// If bitcoin or paypal reset the dropdown validation if required
+	if (isPayPalSelected() || isBitCoinSelected()) {
 		validFieldLabelFormatter(paymentDropDown.previousElementSibling);
 		validFieldFormatter(paymentDropDown);
 	} else {
-		let isValidPaymentMethodSelected = validateCCPaymentSelection();
+		let isValidPaymentMethodSelected = isCCPaymentSelected();
 		if (!isValidPaymentMethodSelected) {
 			invalidFieldValidationLabelFormatter(paymentDropDown.previousElementSibling);
 			invalidFieldValidationFormatter(paymentDropDown);
@@ -268,8 +271,9 @@ submitButton.addEventListener('click', (e) => {
 	}
 });
 
+// credit card validations
 function validateCreditCardPaymentSection() {
-	let isValidPaymentMethodSelected = validateCCPaymentSelection();
+	let isValidPaymentMethodSelected = isCCPaymentSelected();
 	let isFormValid = true;
 
 	if (isValidPaymentMethodSelected) {
@@ -318,15 +322,15 @@ function validateActivities() {
 	return selections.length > 0;
 }
 
-function validateCCPaymentSelection() {
+function isCCPaymentSelected() {
 	return paymentDropDown.value === 'credit card';
 }
 
-function validatePayPalPaymentSelection() {
+function isPayPalSelected() {
 	return paymentDropDown.value === 'paypal';
 }
 
-function validateBitcoinPaymentSelection() {
+function isBitCoinSelected() {
 	return paymentDropDown.value === 'bitcoin';
 }
 
@@ -372,11 +376,4 @@ function validFieldLabelFormatter(label) {
 		label.style.fontWeight = null;
 		label.style.color = null;
 	}
-}
-
-// Resets the TShirt design drop down
-function updateDesignDropDown() {
-	let designThemeDefault = document.querySelector('#design').firstElementChild;
-	let isHidden = designThemeDefault.hidden;
-	isHidden ? (designThemeDefault.hidden = 'false') : (designThemeDefault.hidden = 'true');
 }
