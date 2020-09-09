@@ -26,6 +26,8 @@ const selectionOther = 'other';
 window.addEventListener('load', (e) => {
 	nameField.focus();
 	hideOtherInput();
+	hideColorDropDown();
+	hideTShirtColorDropDownLabel();
 });
 
 //============== Script Section: Job Role Selection ==============//
@@ -47,10 +49,31 @@ function hideOtherInput() {
 	occupationContainer.style.display = 'none';
 }
 
+function hideColorDropDown() {
+	tShirtColorSelectionOptions.style.display = 'none';
+}
+
+function hideTShirtColorDropDownLabel() {
+	tShirtColorSelectionOptions.previousElementSibling.style.display = 'none';
+}
+
+function showColorDropDown() {
+	tShirtColorSelectionOptions.style.display = 'block';
+}
+
+function showTShirtColorDropDownLabel() {
+	tShirtColorSelectionOptions.previousElementSibling.style.display = 'inline-block';
+}
+
 //============== Script Section: T-Shirt Design control section ==============//
 tShirtDesignSelection.addEventListener('change', (e) => {
 	e.preventDefault();
 	reset(); // reset the values before starting
+
+	// display the colors selection
+	showTShirtColorDropDownLabel();
+	showColorDropDown();
+
 	const tshirtData = [
 		{ selection: 'Select Theme', disabledcolors: [], defaultColor: '' },
 		{
@@ -215,7 +238,6 @@ function reset() {
 
 // ========= Form Validation section ========//
 submitButton.addEventListener('click', (e) => {
-	e.preventDefault();
 	let isFormValid = true;
 
 	let isUserValid = validate(userField.value, /\w{1,}/gi);
@@ -267,6 +289,8 @@ submitButton.addEventListener('click', (e) => {
 	isFormValid = validateCreditCardPaymentSection();
 
 	if (isFormValid === false) {
+		e.preventDefault();
+	} else {
 		e.preventDefault();
 	}
 });
