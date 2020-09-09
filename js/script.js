@@ -8,6 +8,7 @@ let registerForActivitiesContainer = document.querySelector('.activities');
 let activitiesCostCheckboxes = document.querySelectorAll('.activities input');
 let activitiesTitle = document.querySelector('.activities>legend');
 let creditCardContainer = document.getElementById('credit-card');
+let paymentDropDown = document.getElementById('payment');
 
 // Fields input
 let userField = document.getElementById('name');
@@ -167,7 +168,6 @@ function calculateActivitesCost() {
 }
 
 //============== Payment information:   ==============//
-let paymentDropDown = document.getElementById('payment');
 
 paymentDropDown.addEventListener('change', (e) => {
 	e.preventDefault();
@@ -212,77 +212,100 @@ function reset() {
 
 // ========= Form Validation section ========//
 submitButton.addEventListener('click', (e) => {
+	e.preventDefault();
 	let isFormValid = true;
 
 	let isUserValid = validate(userField.value, /\w{1,}/gi);
 	if (!isUserValid) {
-		invalidFieldValidationLabelFormatter(userField);
+		invalidFieldValidationLabelFormatter(userField.previousElementSibling);
 		invalidFieldValidationFormatter(userField);
 		isFormValid = false;
 	} else {
-		validFieldLabelFormatter(userField);
+		validFieldLabelFormatter(userField.previousElementSibling);
 		validFieldFormatter(userField);
 	}
 
-	let isEmailValid = validate(emailField.value, /^\w{1,}\@\w{1,}\.\w{2,}/gi);
+	let isEmailValid = validate(emailField.value, /^\S+\@\S{1,}\.\S{2,}/gi);
 	if (!isEmailValid) {
-		invalidFieldValidationLabelFormatter(emailField);
+		invalidFieldValidationLabelFormatter(emailField.previousElementSibling);
 		invalidFieldValidationFormatter(emailField);
 		isFormValid = false;
 	} else {
-		validFieldLabelFormatter(emailField);
+		validFieldLabelFormatter(emailField.previousElementSibling);
 		validFieldFormatter(emailField);
 	}
 
 	let isActivitiesValid = validateActivities();
 	if (!isActivitiesValid) {
-		activitiesTitle.style.fontWeight = 'bold';
-		activitiesTitle.style.color = 'red';
+		invalidFieldValidationLabelFormatter(registerForActivitiesContainer.firstElementChild);
 		invalidFieldValidationFormatter(activitiesTitle);
 		isFormValid = false;
 	} else {
-		activitiesTitle.style.fontWeight = null;
-		activitiesTitle.style.color = null;
+		validFieldLabelFormatter(registerForActivitiesContainer.firstElementChild);
 		validFieldFormatter(activitiesTitle);
 	}
 
-	let isValidCreditCard = validCreditCardNumber();
-	if (!isValidCreditCard) {
-		invalidFieldValidationLabelFormatter(ccNum);
-		invalidFieldValidationFormatter(ccNum);
-		isFormValid = false;
+	// If bitcoin or paypal reset the dropdown validation
+	if (validatePayPalPaymentSelection() || validateBitcoinPaymentSelection()) {
+		validFieldLabelFormatter(paymentDropDown.previousElementSibling);
+		validFieldFormatter(paymentDropDown);
 	} else {
-		validFieldLabelFormatter(ccNum);
-		validFieldFormatter(ccNum);
+		let isValidPaymentMethodSelected = validateCCPaymentSelection();
+		// Reset the field before selection is highlighted
+		if (!isValidPaymentMethodSelected) {
+			invalidFieldValidationLabelFormatter(paymentDropDown.previousElementSibling);
+			invalidFieldValidationFormatter(paymentDropDown);
+			isFormValid = false;
+		} else {
+			validFieldLabelFormatter(paymentDropDown.previousElementSibling);
+			validFieldFormatter(paymentDropDown);
+		}
 	}
 
-	let isZipValid = validZipCode();
-	if (!isZipValid) {
-		invalidFieldValidationLabelFormatter(zipCode);
-		invalidFieldValidationFormatter(zipCode);
-		isFormValid = false;
-	} else {
-		validFieldLabelFormatter(zipCode);
-		validFieldFormatter(zipCode);
-	}
-
-	let isCVVValid = validCVV();
-	if (!isCVVValid) {
-		invalidFieldValidationLabelFormatter(cvvContainer);
-		invalidFieldValidationFormatter(cvvContainer);
-		isFormValid = false;
-	} else {
-		validFieldLabelFormatter(cvvContainer);
-		validFieldFormatter(cvvContainer);
-	}
+	isFormValid = validateCreditCardPaymentSection();
 
 	if (isFormValid === false) {
 		e.preventDefault();
-	} else {
-		e.preventDefault();
-		console.log('Normally a post would happen here but swallowing for now');
 	}
 });
+
+function validateCreditCardPaymentSection() {
+	let isValidPaymentMethodSelected = validateCCPaymentSelection();
+	let isFormValid = true;
+
+	if (isValidPaymentMethodSelected) {
+		let isValidCreditCard = validCreditCardNumber();
+		if (!isValidCreditCard) {
+			invalidFieldValidationLabelFormatter(ccNum.previousElementSibling);
+			invalidFieldValidationFormatter(ccNum);
+			isFormValid = false;
+		} else {
+			validFieldLabelFormatter(ccNum.previousElementSibling);
+			validFieldFormatter(ccNum);
+		}
+
+		let isZipValid = validZipCode();
+		if (!isZipValid) {
+			invalidFieldValidationLabelFormatter(zipCode.previousElementSibling);
+			invalidFieldValidationFormatter(zipCode);
+			isFormValid = false;
+		} else {
+			validFieldLabelFormatter(zipCode.previousElementSibling);
+			validFieldFormatter(zipCode);
+		}
+
+		let isCVVValid = validCVV();
+		if (!isCVVValid) {
+			invalidFieldValidationLabelFormatter(cvvContainer.previousElementSibling);
+			invalidFieldValidationFormatter(cvvContainer);
+			isFormValid = false;
+		} else {
+			validFieldLabelFormatter(cvvContainer.previousElementSibling);
+			validFieldFormatter(cvvContainer);
+		}
+	}
+	return isFormValid;
+}
 
 // validate the name field
 function validate(field, validationCriteria) {
@@ -296,11 +319,24 @@ function validateActivities() {
 	return selections.length > 0;
 }
 
+function validateCCPaymentSelection() {
+	return paymentDropDown.value === 'credit card';
+}
+
+function validatePayPalPaymentSelection() {
+	return paymentDropDown.value === 'paypal';
+}
+
+function validateBitcoinPaymentSelection() {
+	return paymentDropDown.value === 'bitcoin';
+}
+
 function validCreditCardNumber() {
-	if (creditCardContainer.hidden === false && paymentDropDown.value === 'credit card') {
+	if (creditCardContainer.hidden === false) {
 		let number = ccNum.value;
 		return (isCCValid = validate(number, /\d{13,16}/));
 	}
+	return false;
 }
 
 function validZipCode() {
@@ -321,8 +357,7 @@ function invalidFieldValidationFormatter(field) {
 	field.style.border = '5px solid red';
 }
 
-function invalidFieldValidationLabelFormatter(field) {
-	let label = field.previousElementSibling;
+function invalidFieldValidationLabelFormatter(label) {
 	label.style.color = 'red';
 	label.style.fontWeight = 'bold';
 }
@@ -333,8 +368,7 @@ function validFieldFormatter(field) {
 	}
 }
 
-function validFieldLabelFormatter(field) {
-	let label = field.previousElementSibling;
+function validFieldLabelFormatter(label) {
 	if (label.style.fontWeight !== null) {
 		label.style.fontWeight = null;
 		label.style.color = null;
