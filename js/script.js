@@ -21,6 +21,7 @@ let submitButton = document.querySelector("[type='submit']");
 let tShirtColorSelectionOptionsArray = Array.from(tShirtColorSelectionOptions.getElementsByTagName('option'));
 
 const selectionOther = 'other';
+let formStateInvalidation = false; // Global to hold whether or not used to control blur events
 
 //============== Window Event listener to set focus to Name field ==============//
 window.addEventListener('load', (e) => {
@@ -28,6 +29,20 @@ window.addEventListener('load', (e) => {
 	hideOtherInput();
 	hideColorDropDown();
 	hideTShirtColorDropDownLabel();
+});
+
+//============== Script Section: Name Field ==============//
+nameField.addEventListener('blur', (e) => {
+	if (formStateInvalidation) {
+		isUserNameValid();
+	}
+});
+
+//============== Script Section: Email Field ==============//
+emailField.addEventListener('blur', (e) => {
+	if (formStateInvalidation) {
+		isEmailValid();
+	}
 });
 
 //============== Script Section: Job Role Selection ==============//
@@ -123,6 +138,10 @@ registerForActivitiesContainer.addEventListener('click', (e) => {
 		}
 	}
 
+	if (formStateInvalidation) {
+		isActivityValid();
+	}
+
 	updateActivitiesCost(); // update cost
 });
 
@@ -202,7 +221,7 @@ paymentDropDown.addEventListener('change', (e) => {
 	e.preventDefault();
 	let selected = e.target.value;
 	updatePaymentDropDown();
-
+	isPaymentSelectionValid();
 	let selectElements = {
 		paypal: 'paypal',
 		'credit card': 'credit-card',
@@ -239,17 +258,37 @@ function reset() {
 // ========= Form Validation section ========//
 submitButton.addEventListener('click', (e) => {
 	let isFormValid = true;
+	isFormValid = isUserNameValid();
+	isFormValid = isEmailValid();
+	isFormValid = isActivityValid();
+	isFormValid = isPaymentSelectionValid();
+	isFormValid = validateCreditCardPaymentSection();
 
+	formStateInvalidation = true; // this holds the current state of the validation
+	if (isFormValid === false) {
+		e.preventDefault();
+	} else {
+		e.preventDefault();
+	}
+});
+
+function isUserNameValid() {
+	let isValidName = true;
 	let isUserValid = validate(userField.value, /\w{1,}/gi);
 	if (!isUserValid) {
 		invalidFieldValidationLabelFormatter(userField.previousElementSibling);
 		invalidFieldValidationFormatter(userField);
-		isFormValid = false;
+		isValidName = false;
 	} else {
 		validFieldLabelFormatter(userField.previousElementSibling);
 		validFieldFormatter(userField);
 	}
 
+	return isValidName;
+}
+
+function isEmailValid() {
+	let isValid = true;
 	let isEmailValid = validate(emailField.value, /^\S+\@\S{1,}\.\S{2,}/gi);
 	if (!isEmailValid) {
 		invalidFieldValidationLabelFormatter(emailField.previousElementSibling);
@@ -259,18 +298,25 @@ submitButton.addEventListener('click', (e) => {
 		validFieldLabelFormatter(emailField.previousElementSibling);
 		validFieldFormatter(emailField);
 	}
+	return isValid;
+}
 
+function isActivityValid() {
+	let isValid = true;
 	let isActivitiesValid = validateActivities();
 	if (!isActivitiesValid) {
 		invalidFieldValidationLabelFormatter(registerForActivitiesContainer.firstElementChild);
 		invalidFieldValidationFormatter(activitiesTitle);
-		isFormValid = false;
+		isValid = false;
 	} else {
 		validFieldLabelFormatter(registerForActivitiesContainer.firstElementChild);
 		validFieldFormatter(activitiesTitle);
 	}
+	return isValid;
+}
 
-	// If bitcoin or paypal reset the dropdown validation if required
+function isPaymentSelectionValid() {
+	let isValid = true;
 	if (isPayPalSelected() || isBitCoinSelected()) {
 		validFieldLabelFormatter(paymentDropDown.previousElementSibling);
 		validFieldFormatter(paymentDropDown);
@@ -279,33 +325,26 @@ submitButton.addEventListener('click', (e) => {
 		if (!isValidPaymentMethodSelected) {
 			invalidFieldValidationLabelFormatter(paymentDropDown.previousElementSibling);
 			invalidFieldValidationFormatter(paymentDropDown);
-			isFormValid = false;
+			isValid = false;
 		} else {
 			validFieldLabelFormatter(paymentDropDown.previousElementSibling);
 			validFieldFormatter(paymentDropDown);
 		}
 	}
-
-	isFormValid = validateCreditCardPaymentSection();
-
-	if (isFormValid === false) {
-		e.preventDefault();
-	} else {
-		e.preventDefault();
-	}
-});
+	return isValid;
+}
 
 // credit card validations
 function validateCreditCardPaymentSection() {
 	let isValidPaymentMethodSelected = isCCPaymentSelected();
-	let isFormValid = true;
+	let isValid = true;
 
 	if (isValidPaymentMethodSelected) {
 		let isValidCreditCard = validCreditCardNumber();
 		if (!isValidCreditCard) {
 			invalidFieldValidationLabelFormatter(ccNum.previousElementSibling);
 			invalidFieldValidationFormatter(ccNum);
-			isFormValid = false;
+			isValid = false;
 		} else {
 			validFieldLabelFormatter(ccNum.previousElementSibling);
 			validFieldFormatter(ccNum);
@@ -331,7 +370,7 @@ function validateCreditCardPaymentSection() {
 			validFieldFormatter(cvvContainer);
 		}
 	}
-	return isFormValid;
+	return isValid;
 }
 
 // validate the name field
