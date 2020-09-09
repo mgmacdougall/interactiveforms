@@ -251,7 +251,6 @@ submitButton.addEventListener('click', (e) => {
 		validFieldFormatter(paymentDropDown);
 	} else {
 		let isValidPaymentMethodSelected = validateCCPaymentSelection();
-		// Reset the field before selection is highlighted
 		if (!isValidPaymentMethodSelected) {
 			invalidFieldValidationLabelFormatter(paymentDropDown.previousElementSibling);
 			invalidFieldValidationFormatter(paymentDropDown);
