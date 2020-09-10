@@ -6,16 +6,55 @@ let tShirtColorSelect = document.querySelector('#color');
 let tShirtColorSelectionOptions = document.getElementById('color');
 let registerForActivitiesContainer = document.querySelector('.activities');
 let activitiesCostCheckboxes = document.querySelectorAll('.activities input');
+let activitiesTitle = document.querySelector('.activities>legend');
+let creditCardContainer = document.getElementById('credit-card');
+let paymentDropDown = document.getElementById('payment');
 
+// Fields input
+let userField = document.getElementById('name');
+let emailField = document.getElementById('mail');
+let ccNum = document.getElementById('cc-num');
+let zipCode = document.getElementById('zip');
+let cvvContainer = document.getElementById('cvv');
+
+let submitButton = document.querySelector("[type='submit']");
 let tShirtColorSelectionOptionsArray = Array.from(tShirtColorSelectionOptions.getElementsByTagName('option'));
 
 const selectionOther = 'other';
-let activitiesCost = []; // array to hold selected activites
+let formStateInvalidation = false; // Global to hold whether or not used to control blur events
 
 //============== Window Event listener to set focus to Name field ==============//
 window.addEventListener('load', (e) => {
 	nameField.focus();
 	hideOtherInput();
+	hideColorDropDown();
+	hideTShirtColorDropDownLabel();
+});
+
+//============== Script Sec	tion: Name Field ==============//
+nameField.addEventListener('blur', (e) => {
+	if (formStateInvalidation) {
+		isUserNameValid();
+	}
+});
+
+nameField.addEventListener('change', (e) => {
+	if (formStateInvalidation) {
+		isUserNameValid();
+	}
+});
+
+//============== Script Section: Email Field ==============//
+emailField.addEventListener('blur', (e) => {
+	if (formStateInvalidation) {
+		isEmailValid();
+	}
+});
+
+emailField.addEventListener('change', (e) => {
+	if (formStateInvalidation) {
+		isEmailValid();
+	}
 });
 
 //============== Script Section: Job Role Selection ==============//
@@ -36,10 +75,32 @@ function displayOtherInput() {
 function hideOtherInput() {
 	occupationContainer.style.display = 'none';
 }
+
+function hideColorDropDown() {
+	tShirtColorSelectionOptions.style.display = 'none';
+}
+
+function hideTShirtColorDropDownLabel() {
+	tShirtColorSelectionOptions.previousElementSibling.style.display = 'none';
+}
+
+function showColorDropDown() {
+	tShirtColorSelectionOptions.style.display = 'block';
+}
+
+function showTShirtColorDropDownLabel() {
+	tShirtColorSelectionOptions.previousElementSibling.style.display = 'inline-block';
+}
+
 //============== Script Section: T-Shirt Design control section ==============//
 tShirtDesignSelection.addEventListener('change', (e) => {
 	e.preventDefault();
 	reset(); // reset the values before starting
+
+	// display the colors selection
+	showTShirtColorDropDownLabel();
+	showColorDropDown();
+
 	const tshirtData = [
 		{ selection: 'Select Theme', disabledcolors: [], defaultColor: '' },
 		{
@@ -56,8 +117,7 @@ tShirtDesignSelection.addEventListener('change', (e) => {
 	let tShirtSelectionType = e.target.selectedIndex; // gets the selected index of the item selected
 	invokeSelection(tshirtData[tShirtSelectionType].selection, tshirtData); // passes data to the invoke Selection
 
-	// default selection:
-	let defaultSelection = tshirtData[tShirtSelectionType].defaultColor;
+	let defaultSelection = tshirtData[tShirtSelectionType].defaultColor; // default selection
 	setDefaultTshirtColorOption(defaultSelection);
 	updateDesignDropDown();
 });
@@ -65,6 +125,13 @@ tShirtDesignSelection.addEventListener('change', (e) => {
 // sets the default value displaying in the drop down selection
 function setDefaultTshirtColorOption(color) {
 	document.querySelector(`[value='${color}']`).selected = 'true'; // sets the default value
+}
+
+// Resets the TShirt design drop down
+function updateDesignDropDown() {
+	let designThemeDefault = document.querySelector('#design').firstElementChild;
+	let isHidden = designThemeDefault.hidden;
+	isHidden ? (designThemeDefault.hidden = 'false') : (designThemeDefault.hidden = 'true');
 }
 
 //============== Script Section: Activity registration  ==============//
@@ -83,8 +150,11 @@ registerForActivitiesContainer.addEventListener('click', (e) => {
 		}
 	}
 
-	// update cost
-	updateActivitiesCost();
+	if (formStateInvalidation) {
+		isActivityValid();
+	}
+
+	updateActivitiesCost(); // update cost
 });
 
 function toggleActivitiesCheckbox(item) {
@@ -142,7 +212,6 @@ function updateTotalCosts(cost) {
 		textField.innerText = '$' + cost;
 		currentActivitiesCost.hidden = false;
 	} else {
-		// textField.innerText = null;
 		currentActivitiesCost.hidden = true;
 	}
 }
@@ -160,27 +229,22 @@ function calculateActivitesCost() {
 }
 
 //============== Payment information:   ==============//
-let paymentDropDown = document.getElementById('payment');
-
 paymentDropDown.addEventListener('change', (e) => {
 	e.preventDefault();
 	let selected = e.target.value;
 	updatePaymentDropDown();
-
-	// This is needed to replace the - in the in the event that the selection is missing a'-'
-	let selectionItem = selected.replace(/\W+/, '-');
-
+	isPaymentSelectionValid();
 	let selectElements = {
 		paypal: 'paypal',
-		'credit-card': 'credit-card',
+		'credit card': 'credit-card',
 		bitcoin: 'bitcoin',
 	};
 
 	for (let item in selectElements) {
-		if (selectElements[item] !== selectionItem) {
-			document.getElementById(selectElements[item]).hidden = true;
-		} else {
+		if (item === selected) {
 			document.getElementById(selectElements[item]).hidden = false;
+		} else {
+			document.getElementById(selectElements[item]).hidden = true;
 		}
 	}
 });
@@ -191,6 +255,28 @@ function updatePaymentDropDown() {
 	let isHidden = defaultPayment.hidden;
 	isHidden ? (defaultPayment.hidden = 'false') : (defaultPayment.hidden = 'true');
 }
+
+ccNum.addEventListener('blur', (e) => {
+	validateCreditCardPaymentSection();
+});
+
+ccNum.addEventListener('change', (e) => {
+	validateCreditCardPaymentSection();
+});
+
+zipCode.addEventListener('blur', (e) => {
+	validateCreditCardPaymentSection();
+});
+
+zipCode.addEventListener('change', (e) => {
+	validateCreditCardPaymentSection();
+});
+cvvContainer.addEventListener('blur', (e) => {
+	validateCreditCardPaymentSection();
+});
+cvvContainer.addEventListener('change', (e) => {
+	validateCreditCardPaymentSection();
+});
 
 //============== General Functions Section: Supporting functions  ==============//
 // Resets the Page to default view
@@ -203,11 +289,240 @@ function reset() {
 	});
 }
 
-// ========= Form Validation section ========
+// ========= Form Validation section ========//
+submitButton.addEventListener('click', (e) => {
+	let isFormValid = true;
+	isFormValid = isUserNameValid();
+	isFormValid = isEmailValid();
+	isFormValid = isActivityValid();
+	isFormValid = isPaymentSelectionValid();
+	isFormValid = validateCreditCardPaymentSection();
 
-// Resets the TShirt design drop down
-function updateDesignDropDown() {
-	let designThemeDefault = document.querySelector('#design').firstElementChild;
-	let isHidden = designThemeDefault.hidden;
-	isHidden ? (designThemeDefault.hidden = 'false') : (designThemeDefault.hidden = 'true');
+	formStateInvalidation = true; // this holds the current state of the validation
+	if (isFormValid === false) {
+		e.preventDefault();
+	} else {
+		e.preventDefault();
+	}
+});
+
+function isUserNameValid() {
+	let isValidName = true;
+	let isUserValid = validate(userField.value, /\w{1,}/gi);
+
+	if (!isUserValid) {
+		applyInvalidFieldFormat(userField);
+		isValidName = false;
+	} else {
+		removeInvalidFieldFormat(userField);
+	}
+
+	return isValidName;
+}
+
+function isEmailValid() {
+	let isValid = true;
+	let isEmailValid = validate(emailField.value, /^\S+\@\S{1,}\.\S{2,}/gi);
+	if (!isEmailValid) {
+		applyInvalidFieldFormat(emailField);
+		isFormValid = false;
+	} else {
+		removeInvalidFieldFormat(emailField);
+	}
+	return isValid;
+}
+
+function isActivityValid() {
+	let isValid = true;
+	let isActivitiesValid = validateActivities();
+	if (!isActivitiesValid) {
+		let messageTag = registerForActivitiesContainer.firstElementChild.firstElementChild;
+		if (messageTag && messageTag.tagName === 'SPAN') {
+			registerForActivitiesContainer.firstElementChild.firstElementChild.remove('span');
+		}
+		invalidFieldValidationLabelFormatter(registerForActivitiesContainer.firstElementChild); // this uses custom formatter bc of page structure
+		invalidFieldValidationFormatter(activitiesTitle);
+		updateWithWarningMessage(activitiesTitle, 'Please make a selection.');
+		isValid = false;
+	} else {
+		let messageTag = registerForActivitiesContainer.firstElementChild.firstElementChild;
+		if (messageTag && messageTag.tagName === 'SPAN') {
+			registerForActivitiesContainer.firstElementChild.firstElementChild.remove('span');
+		}
+		validFieldLabelFormatter(registerForActivitiesContainer.firstElementChild); // this uses custom formatter bc of page structure
+		validFieldFormatter(activitiesTitle);
+	}
+	return isValid;
+}
+
+function isPaymentSelectionValid() {
+	let isValid = true;
+	if (isPayPalSelected() || isBitCoinSelected()) {
+		removeInvalidFieldFormat(paymentDropDown);
+		validFieldLabelFormatter(paymentDropDown.previousElementSibling);
+		validFieldFormatter(paymentDropDown);
+	} else {
+		let isValidPaymentMethodSelected = isCCPaymentSelected();
+		if (!isValidPaymentMethodSelected) {
+			invalidFieldValidationLabelFormatter(paymentDropDown.previousElementSibling);
+			invalidFieldValidationFormatter(paymentDropDown);
+			isValid = false;
+		} else {
+			validFieldLabelFormatter(paymentDropDown.previousElementSibling);
+			validFieldFormatter(paymentDropDown);
+		}
+	}
+	return isValid;
+}
+
+// credit card validations
+function validateCreditCardPaymentSection() {
+	let isValidPaymentMethodSelected = isCCPaymentSelected();
+	let isValid = true;
+
+	if (isValidPaymentMethodSelected) {
+		let isValidCreditCard = validCreditCardNumber();
+		if (!isValidCreditCard) {
+			invalidFieldValidationLabelFormatter(ccNum.previousElementSibling);
+			invalidFieldValidationFormatter(ccNum);
+			isValid = false;
+		} else {
+			validFieldLabelFormatter(ccNum.previousElementSibling);
+			validFieldFormatter(ccNum);
+		}
+
+		let isZipValid = validZipCode();
+		if (!isZipValid) {
+			invalidFieldValidationLabelFormatter(zipCode.previousElementSibling);
+			invalidFieldValidationFormatter(zipCode);
+			isFormValid = false;
+		} else {
+			validFieldLabelFormatter(zipCode.previousElementSibling);
+			validFieldFormatter(zipCode);
+		}
+
+		let isCVVValid = validCVV();
+		if (!isCVVValid) {
+			invalidFieldValidationLabelFormatter(cvvContainer.previousElementSibling);
+			invalidFieldValidationFormatter(cvvContainer);
+			isFormValid = false;
+		} else {
+			validFieldLabelFormatter(cvvContainer.previousElementSibling);
+			validFieldFormatter(cvvContainer);
+		}
+	}
+
+	// Will format the payment drop down with a warning
+	if (isValid === false) {
+		// paymentDropDown
+		removeInvalidFieldFormat(paymentDropDown);
+		applyInvalidFieldFormat(paymentDropDown, 'Credit card details incorrect.');
+	} else {
+		removeInvalidFieldFormat(paymentDropDown);
+	}
+
+	return isValid;
+}
+
+// validate the name field
+function validate(field, validationCriteria) {
+	let result = validationCriteria.test(field);
+	return result;
+}
+
+function validateActivities() {
+	let selections = [...activitiesCostCheckboxes].filter((item) => item.checked === true);
+	[...activitiesCostCheckboxes].forEach((item) => console.log(item.checked === true));
+	return selections.length > 0;
+}
+
+function isCCPaymentSelected() {
+	return paymentDropDown.value === 'credit card';
+}
+
+function isPayPalSelected() {
+	return paymentDropDown.value === 'paypal';
+}
+
+function isBitCoinSelected() {
+	return paymentDropDown.value === 'bitcoin';
+}
+
+function validCreditCardNumber() {
+	if (creditCardContainer.hidden === false) {
+		let number = ccNum.value;
+		return (isCCValid = validate(number, /\d{13,16}/));
+	}
+	return false;
+}
+
+function validZipCode() {
+	if (creditCardContainer.hidden === false) {
+		let zcode = zipCode.value;
+		return (isZipValid = validate(zcode, /\d{5}/));
+	}
+}
+
+function validCVV() {
+	if (creditCardContainer.hidden === false) {
+		let cvvCode = cvv.value;
+		return validate(cvvCode, /[0-9]{3}/);
+	}
+}
+
+function invalidFieldValidationFormatter(field) {
+	field.style.border = '5px solid red';
+}
+
+function invalidFieldValidationLabelFormatter(label) {
+	label.style.color = 'red';
+	label.style.fontWeight = 'bold';
+}
+
+function validFieldFormatter(field) {
+	if (field.style.border !== null) {
+		field.style.border = null;
+	}
+}
+
+function validFieldLabelFormatter(label) {
+	if (label.style.fontWeight !== null) {
+		label.style.fontWeight = null;
+		label.style.color = null;
+	}
+}
+
+function updateWithWarningMessage(object, text = 'Invalid selection.') {
+	let messageSpan = document.createElement('span');
+	object.style.width = '100%';
+	messageSpan.innerText = `** ${text}.`;
+	messageSpan.style.float = 'right';
+	object.appendChild(messageSpan);
+}
+
+function updateCurrentText(object) {
+	let arrSpan = object.firstElementChild;
+	let currentText = object.innerText;
+	if (arrSpan) {
+		object.removeChild(arrSpan);
+	} else {
+		if (currentText.includes('**') || arrSpan) {
+			object.innerText = currentText.split('**')[0];
+		}
+	}
+}
+
+// Formatter for the invalid inputs
+function applyInvalidFieldFormat(field, errMessage = 'Invalid selection.') {
+	removeInvalidFieldFormat(field);
+	invalidFieldValidationLabelFormatter(field.previousElementSibling);
+	invalidFieldValidationFormatter(field);
+	updateWithWarningMessage(field.previousElementSibling, errMessage);
+}
+
+// formatter to remove the warning message
+function removeInvalidFieldFormat(field) {
+	updateCurrentText(field.previousElementSibling); // resets the value is set
+	validFieldLabelFormatter(field.previousElementSibling);
+	validFieldFormatter(field);
 }
