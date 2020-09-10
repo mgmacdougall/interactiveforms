@@ -31,8 +31,14 @@ window.addEventListener('load', (e) => {
 	hideTShirtColorDropDownLabel();
 });
 
-//============== Script Section: Name Field ==============//
+//============== Script Sec	tion: Name Field ==============//
 nameField.addEventListener('blur', (e) => {
+	if (formStateInvalidation) {
+		isUserNameValid();
+	}
+});
+
+nameField.addEventListener('change', (e) => {
 	if (formStateInvalidation) {
 		isUserNameValid();
 	}
@@ -40,6 +46,12 @@ nameField.addEventListener('blur', (e) => {
 
 //============== Script Section: Email Field ==============//
 emailField.addEventListener('blur', (e) => {
+	if (formStateInvalidation) {
+		isEmailValid();
+	}
+});
+
+emailField.addEventListener('change', (e) => {
 	if (formStateInvalidation) {
 		isEmailValid();
 	}
@@ -275,13 +287,12 @@ submitButton.addEventListener('click', (e) => {
 function isUserNameValid() {
 	let isValidName = true;
 	let isUserValid = validate(userField.value, /\w{1,}/gi);
+
 	if (!isUserValid) {
-		invalidFieldValidationLabelFormatter(userField.previousElementSibling);
-		invalidFieldValidationFormatter(userField);
+		applyInvalidFieldFormat(userField);
 		isValidName = false;
 	} else {
-		validFieldLabelFormatter(userField.previousElementSibling);
-		validFieldFormatter(userField);
+		removeInvalidFieldFormat(userField);
 	}
 
 	return isValidName;
@@ -291,12 +302,10 @@ function isEmailValid() {
 	let isValid = true;
 	let isEmailValid = validate(emailField.value, /^\S+\@\S{1,}\.\S{2,}/gi);
 	if (!isEmailValid) {
-		invalidFieldValidationLabelFormatter(emailField.previousElementSibling);
-		invalidFieldValidationFormatter(emailField);
+		applyInvalidFieldFormat(emailField);
 		isFormValid = false;
 	} else {
-		validFieldLabelFormatter(emailField.previousElementSibling);
-		validFieldFormatter(emailField);
+		removeInvalidFieldFormat(emailField);
 	}
 	return isValid;
 }
@@ -305,11 +314,21 @@ function isActivityValid() {
 	let isValid = true;
 	let isActivitiesValid = validateActivities();
 	if (!isActivitiesValid) {
-		invalidFieldValidationLabelFormatter(registerForActivitiesContainer.firstElementChild);
+		let messageTag = registerForActivitiesContainer.firstElementChild.firstElementChild;
+		if (messageTag && messageTag.tagName === 'SPAN') {
+			registerForActivitiesContainer.firstElementChild.firstElementChild.remove('span');
+		}
+		// updateWithWarningMessage(registerForActivitiesContainer);
+		invalidFieldValidationLabelFormatter(registerForActivitiesContainer.firstElementChild); // this uses custom formatter bc of page structure
 		invalidFieldValidationFormatter(activitiesTitle);
+		updateWithWarningMessage(activitiesTitle, 'Please select an activity.');
 		isValid = false;
 	} else {
-		validFieldLabelFormatter(registerForActivitiesContainer.firstElementChild);
+		let messageTag = registerForActivitiesContainer.firstElementChild.firstElementChild;
+		if (messageTag && messageTag.tagName === 'SPAN') {
+			registerForActivitiesContainer.firstElementChild.firstElementChild.remove('span');
+		}
+		validFieldLabelFormatter(registerForActivitiesContainer.firstElementChild); // this uses custom formatter bc of page structure
 		validFieldFormatter(activitiesTitle);
 	}
 	return isValid;
@@ -370,6 +389,16 @@ function validateCreditCardPaymentSection() {
 			validFieldFormatter(cvvContainer);
 		}
 	}
+
+	// Will format the payment drop down with a warning
+	if (isValid === false) {
+		// paymentDropDown
+		removeInvalidFieldFormat(paymentDropDown);
+		applyInvalidFieldFormat(paymentDropDown, 'One or more values');
+	} else {
+		removeInvalidFieldFormat(paymentDropDown);
+	}
+
 	return isValid;
 }
 
@@ -439,4 +468,39 @@ function validFieldLabelFormatter(label) {
 		label.style.fontWeight = null;
 		label.style.color = null;
 	}
+}
+
+function updateWithWarningMessage(object, text) {
+	let messageSpan = document.createElement('span');
+	object.style.width = '100%';
+	messageSpan.innerText = `** ${text} is invalid.`;
+	messageSpan.style.float = 'right';
+	object.appendChild(messageSpan);
+}
+
+function updateCurrentText(object) {
+	let arrSpan = object.firstElementChild;
+	let currentText = object.innerText;
+	if (arrSpan) {
+		object.removeChild(arrSpan);
+	} else {
+		if (currentText.includes('**') || arrSpan) {
+			object.innerText = currentText.split('**')[0];
+		}
+	}
+}
+
+// Formatter for the invalid inputs
+function applyInvalidFieldFormat(field, errMessage = 'Invalid ') {
+	removeInvalidFieldFormat(field);
+	invalidFieldValidationLabelFormatter(field.previousElementSibling);
+	invalidFieldValidationFormatter(field);
+	updateWithWarningMessage(field.previousElementSibling, errMessage);
+}
+
+// formatter to remove the warning message
+function removeInvalidFieldFormat(field) {
+	updateCurrentText(field.previousElementSibling); // resets the value is set
+	validFieldLabelFormatter(field.previousElementSibling);
+	validFieldFormatter(field);
 }
