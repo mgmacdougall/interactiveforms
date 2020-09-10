@@ -256,6 +256,28 @@ function updatePaymentDropDown() {
 	isHidden ? (defaultPayment.hidden = 'false') : (defaultPayment.hidden = 'true');
 }
 
+ccNum.addEventListener('blur', (e) => {
+	validateCreditCardPaymentSection();
+});
+
+ccNum.addEventListener('change', (e) => {
+	validateCreditCardPaymentSection();
+});
+
+zipCode.addEventListener('blur', (e) => {
+	validateCreditCardPaymentSection();
+});
+
+zipCode.addEventListener('change', (e) => {
+	validateCreditCardPaymentSection();
+});
+cvvContainer.addEventListener('blur', (e) => {
+	validateCreditCardPaymentSection();
+});
+cvvContainer.addEventListener('change', (e) => {
+	validateCreditCardPaymentSection();
+});
+
 //============== General Functions Section: Supporting functions  ==============//
 // Resets the Page to default view
 function reset() {
@@ -318,10 +340,9 @@ function isActivityValid() {
 		if (messageTag && messageTag.tagName === 'SPAN') {
 			registerForActivitiesContainer.firstElementChild.firstElementChild.remove('span');
 		}
-		// updateWithWarningMessage(registerForActivitiesContainer);
 		invalidFieldValidationLabelFormatter(registerForActivitiesContainer.firstElementChild); // this uses custom formatter bc of page structure
 		invalidFieldValidationFormatter(activitiesTitle);
-		updateWithWarningMessage(activitiesTitle, 'Please select an activity.');
+		updateWithWarningMessage(activitiesTitle, 'Please make a selection.');
 		isValid = false;
 	} else {
 		let messageTag = registerForActivitiesContainer.firstElementChild.firstElementChild;
@@ -337,6 +358,7 @@ function isActivityValid() {
 function isPaymentSelectionValid() {
 	let isValid = true;
 	if (isPayPalSelected() || isBitCoinSelected()) {
+		removeInvalidFieldFormat(paymentDropDown);
 		validFieldLabelFormatter(paymentDropDown.previousElementSibling);
 		validFieldFormatter(paymentDropDown);
 	} else {
@@ -394,7 +416,7 @@ function validateCreditCardPaymentSection() {
 	if (isValid === false) {
 		// paymentDropDown
 		removeInvalidFieldFormat(paymentDropDown);
-		applyInvalidFieldFormat(paymentDropDown, 'One or more values');
+		applyInvalidFieldFormat(paymentDropDown, 'Credit card details incorrect.');
 	} else {
 		removeInvalidFieldFormat(paymentDropDown);
 	}
@@ -470,10 +492,10 @@ function validFieldLabelFormatter(label) {
 	}
 }
 
-function updateWithWarningMessage(object, text) {
+function updateWithWarningMessage(object, text = 'Invalid selection.') {
 	let messageSpan = document.createElement('span');
 	object.style.width = '100%';
-	messageSpan.innerText = `** ${text} is invalid.`;
+	messageSpan.innerText = `** ${text}.`;
 	messageSpan.style.float = 'right';
 	object.appendChild(messageSpan);
 }
@@ -491,7 +513,7 @@ function updateCurrentText(object) {
 }
 
 // Formatter for the invalid inputs
-function applyInvalidFieldFormat(field, errMessage = 'Invalid ') {
+function applyInvalidFieldFormat(field, errMessage = 'Invalid selection.') {
 	removeInvalidFieldFormat(field);
 	invalidFieldValidationLabelFormatter(field.previousElementSibling);
 	invalidFieldValidationFormatter(field);
