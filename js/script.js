@@ -29,6 +29,7 @@ window.addEventListener('load', (e) => {
 	hideOtherInput();
 	hideColorDropDown();
 	hideTShirtColorDropDownLabel();
+	setDefaultPaymentMethod('credit card');
 });
 
 //============== Script Sec	tion: Name Field ==============//
@@ -55,6 +56,10 @@ emailField.addEventListener('change', (e) => {
 	if (formStateInvalidation) {
 		isEmailValid();
 	}
+});
+
+emailField.addEventListener('keydown', (e) => {
+	isEmailValid();
 });
 
 //============== Script Section: Job Role Selection ==============//
@@ -234,6 +239,10 @@ paymentDropDown.addEventListener('change', (e) => {
 	let selected = e.target.value;
 	updatePaymentDropDown();
 	isPaymentSelectionValid();
+	activatePaymentSelection(selected);
+});
+
+function activatePaymentSelection(selection) {
 	let selectElements = {
 		paypal: 'paypal',
 		'credit card': 'credit-card',
@@ -241,13 +250,18 @@ paymentDropDown.addEventListener('change', (e) => {
 	};
 
 	for (let item in selectElements) {
-		if (item === selected) {
+		if (item === selection) {
 			document.getElementById(selectElements[item]).hidden = false;
 		} else {
 			document.getElementById(selectElements[item]).hidden = true;
 		}
 	}
-});
+}
+
+function setDefaultPaymentMethod(paymentMethod) {
+	document.querySelector(`[value="${paymentMethod}"]`).selected = 'selected';
+	activatePaymentSelection(paymentMethod);
+}
 
 // Updates the Payment Drop down 'Select Payment Method'
 function updatePaymentDropDown() {
@@ -292,7 +306,7 @@ function reset() {
 // ========= Form Validation section ========//
 submitButton.addEventListener('click', (e) => {
 	let isFormValid = true;
-	isFormValid = isUserNameValid();
+	isFormValid = isUserNameValid('Please enter a valid name.');
 	isFormValid = isEmailValid();
 	isFormValid = isActivityValid();
 	isFormValid = isPaymentSelectionValid();
@@ -301,17 +315,15 @@ submitButton.addEventListener('click', (e) => {
 	formStateInvalidation = true; // this holds the current state of the validation
 	if (isFormValid === false) {
 		e.preventDefault();
-	} else {
-		e.preventDefault();
 	}
 });
 
-function isUserNameValid() {
+function isUserNameValid(errMessage) {
 	let isValidName = true;
 	let isUserValid = validate(userField.value, /\w{1,}/gi);
 
 	if (!isUserValid) {
-		applyInvalidFieldFormat(userField);
+		applyInvalidFieldFormat(userField, errMessage);
 		isValidName = false;
 	} else {
 		removeInvalidFieldFormat(userField);
@@ -320,11 +332,11 @@ function isUserNameValid() {
 	return isValidName;
 }
 
-function isEmailValid() {
+function isEmailValid(errMessage = 'Invalid email') {
 	let isValid = true;
 	let isEmailValid = validate(emailField.value, /^\S+\@\S{1,}\.\S{2,}/gi);
 	if (!isEmailValid) {
-		applyInvalidFieldFormat(emailField);
+		applyInvalidFieldFormat(emailField, errMessage);
 		isFormValid = false;
 	} else {
 		removeInvalidFieldFormat(emailField);
@@ -377,48 +389,48 @@ function isPaymentSelectionValid() {
 
 // credit card validations
 function validateCreditCardPaymentSection() {
+	removeInvalidFieldFormat(paymentDropDown);
+
 	let isValidPaymentMethodSelected = isCCPaymentSelected();
-	let isValid = true;
+	let isValid = false;
 
 	if (isValidPaymentMethodSelected) {
 		let isValidCreditCard = validCreditCardNumber();
 		if (!isValidCreditCard) {
 			invalidFieldValidationLabelFormatter(ccNum.previousElementSibling);
 			invalidFieldValidationFormatter(ccNum);
-			isValid = false;
 		} else {
 			validFieldLabelFormatter(ccNum.previousElementSibling);
 			validFieldFormatter(ccNum);
+			isValid = true;
 		}
 
 		let isZipValid = validZipCode();
 		if (!isZipValid) {
 			invalidFieldValidationLabelFormatter(zipCode.previousElementSibling);
 			invalidFieldValidationFormatter(zipCode);
-			isFormValid = false;
 		} else {
 			validFieldLabelFormatter(zipCode.previousElementSibling);
 			validFieldFormatter(zipCode);
+			isFormValid = true;
 		}
 
 		let isCVVValid = validCVV();
 		if (!isCVVValid) {
 			invalidFieldValidationLabelFormatter(cvvContainer.previousElementSibling);
 			invalidFieldValidationFormatter(cvvContainer);
-			isFormValid = false;
 		} else {
 			validFieldLabelFormatter(cvvContainer.previousElementSibling);
 			validFieldFormatter(cvvContainer);
+			isFormValid = true;
 		}
-	}
-
-	// Will format the payment drop down with a warning
-	if (isValid === false) {
-		// paymentDropDown
-		removeInvalidFieldFormat(paymentDropDown);
-		applyInvalidFieldFormat(paymentDropDown, 'Credit card details incorrect.');
-	} else {
-		removeInvalidFieldFormat(paymentDropDown);
+		// Will format the payment drop down with a warning
+		if (isValid) {
+			removeInvalidFieldFormat(paymentDropDown);
+		} else {
+			removeInvalidFieldFormat(paymentDropDown);
+			applyInvalidFieldFormat(paymentDropDown, 'Credit card details incorrect.');
+		}
 	}
 
 	return isValid;
@@ -495,7 +507,9 @@ function validFieldLabelFormatter(label) {
 function updateWithWarningMessage(object, text = 'Invalid selection.') {
 	let messageSpan = document.createElement('span');
 	object.style.width = '100%';
-	messageSpan.innerText = `** ${text}.`;
+	messageSpan.innerText = `** ${text}`;
+	messageSpan.style.fontWeight = 'normal';
+	messageSpan.style.fontSize = 'initial';
 	messageSpan.style.float = 'right';
 	object.appendChild(messageSpan);
 }
