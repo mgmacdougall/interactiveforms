@@ -508,6 +508,8 @@ function updateWithWarningMessage(object, text = 'Invalid selection.') {
 	let messageSpan = document.createElement('span');
 	object.style.width = '100%';
 	messageSpan.innerText = `** ${text}`;
+	messageSpan.style.fontWeight = 'normal';
+	messageSpan.style.fontSize = 'initial';
 	messageSpan.style.float = 'right';
 	object.appendChild(messageSpan);
 }
