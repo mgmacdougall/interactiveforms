@@ -56,10 +56,13 @@ emailField.addEventListener('change', (e) => {
 	if (formStateInvalidation) {
 		isEmailValid();
 	}
+	console.log('here');
 });
 
 emailField.addEventListener('keydown', (e) => {
-	isEmailValid();
+	if (formStateInvalidation) {
+		isEmailValid();
+	}
 });
 
 //============== Script Section: Job Role Selection ==============//
@@ -271,25 +274,39 @@ function updatePaymentDropDown() {
 }
 
 ccNum.addEventListener('blur', (e) => {
-	validateCreditCardPaymentSection();
+	if (formStateInvalidation) {
+		validateCreditCardPaymentSection();
+	}
 });
 
 ccNum.addEventListener('change', (e) => {
-	validateCreditCardPaymentSection();
+	if (formStateInvalidation) {
+		validateCreditCardPaymentSection();
+	}
 });
 
 zipCode.addEventListener('blur', (e) => {
-	validateCreditCardPaymentSection();
+	if (formStateInvalidation) {
+		validateCreditCardPaymentSection();
+	}
 });
 
 zipCode.addEventListener('change', (e) => {
-	validateCreditCardPaymentSection();
+	if (formStateInvalidation) {
+		validateCreditCardPaymentSection();
+	}
 });
+
 cvvContainer.addEventListener('blur', (e) => {
-	validateCreditCardPaymentSection();
+	if (formStateInvalidation) {
+		validateCreditCardPaymentSection();
+	}
 });
+
 cvvContainer.addEventListener('change', (e) => {
-	validateCreditCardPaymentSection();
+	if (formStateInvalidation) {
+		validateCreditCardPaymentSection();
+	}
 });
 
 //============== General Functions Section: Supporting functions  ==============//
@@ -462,24 +479,28 @@ function isBitCoinSelected() {
 
 function validCreditCardNumber() {
 	if (creditCardContainer.hidden === false) {
-		let number = ccNum.value;
-		return (isCCValid = validate(number, /\d{13,16}/));
+		let number = convertToNumeric(ccNum.value);
+		return (isCCValid = validate(number, /^([0-9]){13,16}$/));
 	}
 	return false;
 }
 
 function validZipCode() {
 	if (creditCardContainer.hidden === false) {
-		let zcode = zipCode.value;
-		return (isZipValid = validate(zcode, /\d{5}/));
+		let zcode = convertToNumeric(zipCode.value);
+		return (isZipValid = validate(zcode, /^([0-9]){5}$/));
 	}
 }
 
 function validCVV() {
 	if (creditCardContainer.hidden === false) {
-		let cvvCode = cvv.value;
-		return validate(cvvCode, /[0-9]{3}/);
+		let cvvCode = convertToNumeric(cvv.value);
+		return validate(cvvCode, /^([0-9]){3}$/);
 	}
+}
+
+function convertToNumeric(value) {
+	return parseInt(value) || 0;
 }
 
 function invalidFieldValidationFormatter(field) {
