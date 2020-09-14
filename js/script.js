@@ -241,7 +241,7 @@ paymentDropDown.addEventListener('change', (e) => {
 	e.preventDefault();
 	let selected = e.target.value;
 	updatePaymentDropDown();
-	isPaymentSelectionValid();
+	formatPaymentSelection();
 	activatePaymentSelection(selected);
 });
 
@@ -326,8 +326,10 @@ submitButton.addEventListener('click', (e) => {
 	isFormValid = isUserNameValid('Please enter a valid name.');
 	isFormValid = isEmailValid();
 	isFormValid = isActivityValid();
-	isFormValid = isPaymentSelectionValid();
-	isFormValid = validateCreditCardPaymentSection();
+	formatPaymentSelection(); // TODO: rename to something like reset
+	if (isCCPaymentSelected()) {
+		isFormValid = validateCreditCardPaymentSection();
+	}
 
 	formStateInvalidation = true; // this holds the current state of the validation
 	if (isFormValid === false) {
@@ -351,10 +353,10 @@ function isUserNameValid(errMessage) {
 
 function isEmailValid(errMessage = 'Invalid email') {
 	let isValid = true;
-	let isEmailValid = validate(emailField.value, /^\S+\@\S{1,}\.\S{2,}/gi);
+	let isEmailValid = validate(emailField.value, /^\S+\@\S{1,}\.\S{2,}$/gi);
 	if (!isEmailValid) {
 		applyInvalidFieldFormat(emailField, errMessage);
-		isFormValid = false;
+		isValid = false;
 	} else {
 		removeInvalidFieldFormat(emailField);
 	}
@@ -384,8 +386,7 @@ function isActivityValid() {
 	return isValid;
 }
 
-function isPaymentSelectionValid() {
-	let isValid = true;
+function formatPaymentSelection() {
 	if (isPayPalSelected() || isBitCoinSelected()) {
 		removeInvalidFieldFormat(paymentDropDown);
 		validFieldLabelFormatter(paymentDropDown.previousElementSibling);
@@ -401,7 +402,6 @@ function isPaymentSelectionValid() {
 			validFieldFormatter(paymentDropDown);
 		}
 	}
-	return isValid;
 }
 
 // credit card validations
