@@ -36,7 +36,7 @@ window.addEventListener('load', (e) => {
 //============== Script Section: Name Field ==============//
 nameField.addEventListener('blur', (e) => {
 	let name = e.target.value;
-	name == '' ? isUserNameValid('User name is empty.') : isUserNameValid(`${name} not valid.`);
+	name == '' ? isUserNameValid() : isUserNameValid(`${name} not valid.`);
 });
 
 nameField.addEventListener('input', (e) => {
@@ -47,12 +47,12 @@ nameField.addEventListener('input', (e) => {
 //============== Script Section: Email Field ==============//
 emailField.addEventListener('blur', (e) => {
 	let userEmail = e.target.value;
-	userEmail == '' ? isEmailValid('Email cannot be empty.') : isEmailValid(`${userEmail} is not formatted correctly.`);
+	userEmail == '' ? isEmailValid() : isEmailValid(`${userEmail} is not formatted correctly.`);
 });
 
 emailField.addEventListener('input', (e) => {
 	let userEmail = e.target.value;
-	userEmail == '' ? isEmailValid('Email cannot be empty.') : isEmailValid(`${userEmail} is not formatted correctly.`);
+	userEmail == '' ? isEmailValid() : isEmailValid(`${userEmail} is not formatted correctly.`);
 });
 
 //============== Script Section: Job Role Selection ==============//
@@ -276,7 +276,7 @@ ccNum.addEventListener('blur', (e) => {
 
 ccNum.addEventListener('input', (e) => {
 	let ccNumber = e.target.value;
-	ccNumber == '' ? isCreditCardValid('Credit card cannot be blank') : isCreditCardValid(`${ccNumber} is not Valid`);
+	ccNumber == '' ? isCreditCardValid() : isCreditCardValid(`${ccNumber} is not Valid`);
 });
 
 zipCode.addEventListener('blur', (e) => {
@@ -313,7 +313,7 @@ function reset() {
 
 // ========= Form Validation section ========//
 submitButton.addEventListener('click', (e) => {
-	let userNameValid = isUserNameValid('Please enter a valid name.');
+	let userNameValid = isUserNameValid();
 	let emailValid = isEmailValid();
 	let activityValid = isActivityValid();
 	let creditCardValid = true;
@@ -327,7 +327,7 @@ submitButton.addEventListener('click', (e) => {
 	}
 });
 
-function isUserNameValid(errMessage) {
+function isUserNameValid(errMessage = 'Invalid or empty user name') {
 	let isValidName = true;
 	let isUserValid = validate(userField.value, /\w{1,}/gi);
 
@@ -341,7 +341,7 @@ function isUserNameValid(errMessage) {
 	return isValidName;
 }
 
-function isEmailValid(errMessage = 'Invalid email') {
+function isEmailValid(errMessage = 'Invalid or empty email') {
 	let isValid = true;
 	let isEmailValid = validate(emailField.value, /^\S+\@\S{1,}\.\S{2,}$/gi);
 	if (!isEmailValid) {
@@ -399,7 +399,7 @@ function validateCreditCardPaymentSection() {
 }
 
 // Credit card field validation
-function isCreditCardValid(errMessage = 'Invalid Credit Card') {
+function isCreditCardValid(errMessage = 'Invalid or empty Credit Card') {
 	let isValidCreditCard = validCreditCardNumber();
 	if (!isValidCreditCard) {
 		removeInvalidFieldFormat(ccNum);
@@ -412,7 +412,7 @@ function isCreditCardValid(errMessage = 'Invalid Credit Card') {
 }
 
 // Zip code
-function isZipCodeValid(errMessage = 'Invalid Zip Code') {
+function isZipCodeValid(errMessage = 'Invalid or empty Zip Code') {
 	let isZipValid = validZipCode();
 	if (!isZipValid) {
 		removeInvalidFieldFormat(zipCode);
@@ -424,7 +424,7 @@ function isZipCodeValid(errMessage = 'Invalid Zip Code') {
 }
 
 // CVV
-function isCVVCodeValid(errMessage = 'Invalid CVV code.') {
+function isCVVCodeValid(errMessage = 'Invalid or empty CVV code.') {
 	let isCVVValid = validCVV();
 	if (!isCVVValid) {
 		removeInvalidFieldFormat(cvvContainer);
@@ -486,7 +486,7 @@ function convertToNumeric(value) {
 }
 
 function invalidFieldValidationFormatter(field) {
-	field.style.border = '5px solid red';
+	field.style.border = '2px solid red';
 }
 
 function invalidFieldValidationLabelFormatter(label) {
