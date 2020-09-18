@@ -1,5 +1,5 @@
 # interactiveforms
-Project for interactive forms.
+Project for interactive forms (exceeds).
 
 ## Project Outline:
 The project demonstrates how through js and dom manipulation it is possible to create an interactive form that provides:
