@@ -50,12 +50,6 @@ emailField.addEventListener('blur', (e) => {
 	userEmail == '' ? isEmailValid('Email cannot be empty.') : isEmailValid(`${userEmail} is not formatted correctly.`);
 });
 
-emailField.addEventListener('change', (e) => {
-	if (formStateInvalidation) {
-		isEmailValid();
-	}
-});
-
 emailField.addEventListener('input', (e) => {
 	let userEmail = e.target.value;
 	userEmail == '' ? isEmailValid('Email cannot be empty.') : isEmailValid(`${userEmail} is not formatted correctly.`);
@@ -154,7 +148,7 @@ registerForActivitiesContainer.addEventListener('click', (e) => {
 		}
 	}
 
-	if (formStateInvalidation) {
+	if (!formStateInvalidation) {
 		isActivityValid();
 	}
 
@@ -280,12 +274,6 @@ ccNum.addEventListener('blur', (e) => {
 	}
 });
 
-ccNum.addEventListener('change', (e) => {
-	if (formStateInvalidation) {
-		validateCreditCardPaymentSection();
-	}
-});
-
 ccNum.addEventListener('input', (e) => {
 	let ccNumber = e.target.value;
 	ccNumber == '' ? isCreditCardValid('Credit card cannot be blank') : isCreditCardValid(`${ccNumber} is not Valid`);
@@ -297,24 +285,12 @@ zipCode.addEventListener('blur', (e) => {
 	}
 });
 
-zipCode.addEventListener('change', (e) => {
-	if (formStateInvalidation) {
-		validateCreditCardPaymentSection();
-	}
-});
-
 zipCode.addEventListener('input', (e) => {
 	let zipCode = e.target.value;
 	zipCode < 5 ? isZipCodeValid('Zip Code cannot be blank') : isZipCodeValid(`${zipCode} is not Valid`);
 });
 
 cvvContainer.addEventListener('blur', (e) => {
-	if (formStateInvalidation) {
-		validateCreditCardPaymentSection();
-	}
-});
-
-cvvContainer.addEventListener('change', (e) => {
 	if (formStateInvalidation) {
 		validateCreditCardPaymentSection();
 	}
@@ -337,17 +313,16 @@ function reset() {
 
 // ========= Form Validation section ========//
 submitButton.addEventListener('click', (e) => {
-	let isFormValid = true;
-	isFormValid = isUserNameValid('Please enter a valid name.');
-	isFormValid = isEmailValid();
-	isFormValid = isActivityValid();
-	formatPaymentSelection(); // TODO: rename to something like reset
+	let userNameValid = isUserNameValid('Please enter a valid name.');
+	let emailValid = isEmailValid();
+	let activityValid = isActivityValid();
+	let creditCardValid = true;
 	if (isCCPaymentSelected()) {
-		isFormValid = validateCreditCardPaymentSection();
+		creditCardValid = validateCreditCardPaymentSection();
 	}
-
-	formStateInvalidation = true; // this holds the current state of the validation
-	if (isFormValid === false) {
+	// this holds the current state of the validation
+	formStateInvalidation = userNameValid && emailValid && activityValid && creditCardValid;
+	if (formStateInvalidation === false) {
 		e.preventDefault();
 	}
 });
@@ -535,7 +510,7 @@ function validFieldLabelFormatter(label) {
 function updateWithWarningMessage(object, text = 'Invalid selection.') {
 	let messageSpan = document.createElement('span');
 	object.style.width = '100%';
-	messageSpan.innerText = `** ${text}`;
+	messageSpan.innerText = `${text}`;
 	messageSpan.style.fontWeight = 'normal';
 	messageSpan.style.fontSize = 'initial';
 	messageSpan.style.float = 'right';
